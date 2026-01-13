@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAdminAlerts } from "@/hooks/useAdminAlerts";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -39,8 +41,16 @@ export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { data: alerts } = useAdminAlerts();
 
   const isActive = (path: string) => location.pathname === path;
+  const alertCount = alerts?.filter(a => !a.is_resolved).length || 0;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -101,7 +111,7 @@ export default function DashboardLayout() {
                 {!collapsed && (
                   <div className="flex-1 text-left">
                     <p className="font-medium text-sidebar-foreground">Super Admin</p>
-                    <p className="text-xs text-muted-foreground">admin@sweeftcom.in</p>
+                    <p className="text-xs text-muted-foreground truncate max-w-[140px]">{user?.email}</p>
                   </div>
                 )}
               </button>
@@ -112,7 +122,7 @@ export default function DashboardLayout() {
                 Account Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => navigate("/login")}>
+              <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </DropdownMenuItem>
@@ -150,9 +160,11 @@ export default function DashboardLayout() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive border-0">
-                    12
-                  </Badge>
+                  {alertCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive border-0">
+                      {alertCount}
+                    </Badge>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
