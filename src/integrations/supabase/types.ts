@@ -532,6 +532,10 @@ export type Database = {
         Returns: Json
       }
       get_dashboard_stats: { Args: never; Returns: Json }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
